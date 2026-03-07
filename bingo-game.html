@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .bingo-card {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            width: 300px;
+        }
+        .bingo-cell {
+            border: 2px solid #333;
+            padding: 20px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        .marked {
+            background-color: yellow;
+        }
+        #call-number {
+            font-size: 32px;
+            margin: 20px;
+        }
+        #win-message {
+            font-size: 24px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bingo Game</h1>
+    <div id="call-number">Number: </div>
+    <div class="bingo-card" id="bingo-card"></div>
+    <button id="call-btn">Call Number</button>
+    <button id="reset-btn">Reset Game</button>
+    <div id="win-message"></div>
+    <script>
+        const card = [];
+        const bingoCardElement = document.getElementById('bingo-card');
+        const callBtn = document.getElementById('call-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const callNumberElement = document.getElementById('call-number');
+        const winMessageElement = document.getElementById('win-message');
+        let drawnNumbers = [];
+
+        // Initialize the Bingo card
+        function generateCard() {
+            const numbers = Array.from({length: 75}, (_, i) => i + 1);
+            for (let i = 0; i < 5; i++) {
+                card[i] = [];
+                for (let j = 0; j < 5; j++) {
+                    let randomNumber;
+                    do {
+                        randomNumber = numbers.splice(Math.floor(Math.random() * numbers.length), 1)[0];
+                    } while (i === 2 && j === 2);
+                    card[i][j] = randomNumber;
+                }
+            }
+            card[2][2] = 'Free'; // Free space
+            renderCard();
+        }
+
+        function renderCard() {
+            bingoCardElement.innerHTML = '';
+            card.forEach(row => {
+                row.forEach(num => {
+                    const cell = document.createElement('div');
+                    cell.innerText = num;
+                    cell.className = 'bingo-cell';
+                    cell.onclick = () => markCell(num);
+                    bingoCardElement.appendChild(cell);
+                });
+            });
+        }
+
+        function markCell(num) {
+            const cells = document.querySelectorAll('.bingo-cell');
+            cells.forEach(cell => {
+                if (cell.innerText == num) {
+                    cell.classList.add('marked');
+                }
+            });
+        }
+
+        function callNumber() {
+            let random;
+            do {
+                random = Math.floor(Math.random() * 75) + 1;
+            } while (drawnNumbers.includes(random));
+            drawnNumbers.push(random);
+            callNumberElement.innerText = 'Number: ' + random;
+            markCell(random);
+            checkWin();
+        }
+
+        function checkWin() {
+            const winningCombinations = [
+                // Rows
+                [0, 1, 2, 3, 4],
+                [5, 6, 7, 8, 9],
+                [10, 11, 12, 13, 14],
+                [15, 16, 17, 18, 19],
+                [20, 21, 22, 23, 24],
+                // Columns
+                [0, 5, 10, 15, 20],
+                [1, 6, 11, 16, 21],
+                [2, 7, 12, 17, 22],
+                [3, 8, 13, 18, 23],
+                [4, 9, 14, 19, 24],
+                // Diagonals
+                [0, 6, 12, 18, 24],
+                [4, 8, 12, 16, 20],
+            ];
+            for (const combination of winningCombinations) {
+                if (combination.every(index =>
+                    bingoCardElement.childNodes[index].classList.contains('marked'))) {
+                    winMessageElement.innerText = 'You Win!';
+                    callBtn.disabled = true;
+                    return;
+                }
+            }
+        }
+
+        function resetGame() {
+            drawnNumbers = [];
+            callNumberElement.innerText = 'Number: ';
+            winMessageElement.innerText = '';
+            document.querySelectorAll('.bingo-cell').forEach(cell => {
+                cell.classList.remove('marked');
+            });
+            generateCard();
+        }
+
+        callBtn.onclick = callNumber;
+        resetBtn.onclick = resetGame;
+
+        generateCard();
+    </script>
+</body>
+</html>
