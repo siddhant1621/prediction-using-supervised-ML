@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        canvas { background: black; display: block; }
+        #scoreboard { position: absolute; top: 10px; color: white; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div id="scoreboard">Player: 0 | AI: 0</div>
+    <canvas id="pong" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('pong');
+        const context = canvas.getContext('2d');
+
+        // Create the pong paddles and ball
+        const paddleWidth = 10;
+        const paddleHeight = 100;
+        const ballSize = 10;
+
+        const player = { x: 0, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, score: 0 };
+        const ai = { x: canvas.width - paddleWidth, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, score: 0 };
+        const ball = { x: canvas.width / 2, y: canvas.height / 2, size: ballSize, speedX: 5, speedY: 5 };
+
+        function drawRect(x, y, width, height, color) {
+            context.fillStyle = color;
+            context.fillRect(x, y, width, height);
+        }
+
+        function drawBall(x, y, size, color) {
+            context.fillStyle = color;
+            context.beginPath();
+            context.arc(x, y, size, 0, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+        }
+
+        function draw() {
+            // Clear canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw paddles and ball
+            drawRect(player.x, player.y, player.width, player.height, 'white');
+            drawRect(ai.x, ai.y, ai.width, ai.height, 'white');
+            drawBall(ball.x, ball.y, ball.size, 'white');
+            // Draw scoreboard
+            document.getElementById('scoreboard').innerText = `Player: ${player.score} | AI: ${ai.score}`;
+        }
+
+        function update() {
+            // Move ball
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            // Ball collision with top and bottom
+            if (ball.y + ball.size > canvas.height || ball.y - ball.size < 0) {
+                ball.speedY = -ball.speedY;
+            }
+
+            // Ball collision with paddles
+            if (ball.x < player.x + player.width && ball.y > player.y && ball.y < player.y + player.height) {
+                ball.speedX = -ball.speedX;
+            } else if (ball.x + ball.size > ai.x && ball.y > ai.y && ball.y < ai.y + ai.height) {
+                ball.speedX = -ball.speedX;
+            }
+
+            // Update AI paddle position
+            const aiCenter = ai.y + ai.height / 2;
+            if (aiCenter < ball.y) {
+                ai.y += 4;
+            } else {
+                ai.y -= 4;
+            }
+
+            // Reset ball if it goes out of bounds
+            if (ball.x + ball.size < 0) {
+                ai.score++;
+                resetBall();
+            } else if (ball.x - ball.size > canvas.width) {
+                player.score++;
+                resetBall();
+            }
+        }
+
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speedX = -ball.speedX;
+        }
+
+        function controlPaddle(event) {
+            const paddleSpeed = 20;
+            if (event.key === 'ArrowUp' && player.y > 0) {
+                player.y -= paddleSpeed;
+            } else if (event.key === 'ArrowDown' && player.y + player.height < canvas.height) {
+                player.y += paddleSpeed;
+            }
+        }
+
+        document.addEventListener('keydown', controlPaddle);
+
+        function gameLoop() {
+            draw();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
