@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RWU Student Dashboard</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #16213e;
+      --surface3: #0d2137;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --accent3: #43e97b;
+      --accent4: #f7971e;
+      --accent5: #38f9d7;
+      --text: #e8e8f0;
+      --text-muted: #8888aa;
+      --border: #2a2a4a;
+      --card-shadow: 0 8px 32px rgba(108,99,255,0.15);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* Layout */
+    .app-container { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      max-width: calc(100vw - 240px);
+    }
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-sub { font-size: 0.7rem; color: var(--text-muted); font-weight: 400; display: block; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .nav-item:hover { background: rgba(108,99,255,0.1); color: var(--text); }
+    .nav-item.active { background: rgba(108,99,255,0.2); color: var(--accent); font-weight: 600; }
+    .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+    .nav-section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 8px 14px 4px;
+      margin-top: 8px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    /* Inputs */
+    input, select, textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      width: 100%;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+    label { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; display: block; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+
+    /* Buttons */
+    .btn {
+      padding: 9px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #7c74ff; transform: translateY(-1px); }
+    .btn-success { background: var(--accent3); color: #0f1a0f; }
+    .btn-success:hover { background: #56f090; }
+    .btn-danger { background: var(--accent2); color: white; }
+    .btn-danger:hover { background: #ff7d98; }
+    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-icon {
+      padding: 6px 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Progress Ring */
+    .progress-ring-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress-ring-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .progress-ring-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; }
+    .bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.5s ease;
+      min-height: 2px;
+      cursor: pointer;
+    }
+    .bar-label { font-size: 0.65rem; color: var(--text-muted); text-align: center; }
+
+    /* Streak Calendar */
+    .streak-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .streak-day {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    /* Heatmap */
+    .heatmap { display: flex; flex-direction: column; gap: 3px; }
+    .heatmap-row { display: flex; gap: 3px; align-items: center; }
+    .heatmap-cell {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      position: relative;
+    }
+    .heatmap-cell:hover { transform: scale(1.4); z-index: 10; }
+    .heatmap-label { font-size: 0.65rem; color: var(--text-muted); width: 24px; }
+
+    /* Tags */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .tag-accent { background: rgba(108,99,255,0.2); color: var(--accent); }
+    .tag-success { background: rgba(67,233,123,0.15); color: var(--accent3); }
+    .tag-warning { background: rgba(247,151,30,0.2); color: var(--accent4); }
+    .tag-danger { background: rgba(255,101,132,0.15); color: var(--accent2); }
+    .tag-teal { background: rgba(56,249,215,0.15); color: var(--accent5); }
+
+    /* Page header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-title { font-size: 1.6rem; font-weight: 800; }
+    .page-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .date-display {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 140px;
+      text-align: center;
+    }
+
+    /* Metric stat cards */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-icon { font-size: 1.5rem; margin-bottom: 4px; }
+    .stat-value { font-size: 1.6rem; font-weight: 800; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+    .stat-change { font-size: 0.75rem; }
+    .stat-change.up { color: var(--accent3); }
+    .stat-change.down { color: var(--accent2); }
+
+    /* Toggle */
+    .toggle-row { display: flex; align-items: center; gap: 12px; }
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 24px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      left: 3px;
+      top: 3px;
+      transition: 0.3s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent3); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* Scrollable list */
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--surface2);
+      margin-bottom: 8px;
+    }
+    .list-item:last-child { margin-bottom: 0; }
+
+    /* Completion bar */
+    .progress-bar-wrap { background: var(--surface2); border-radius: 100px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 100px; transition: width 0.5s ease; }
+
+    /* Score circle */
+    .score-big {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent), var(--accent5));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+
+    /* Modal / overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 300px;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 4px; }
+    .tab {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+    }
+    .tab.active { background: var(--accent); color: white; }
+    .tab:hover:not(.active) { background: rgba(108,99,255,0.1); color: var(--text); }
+
+    /* Subject row */
+    .subject-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .subject-color { width: 4px; height: 40px; border-radius: 2px; flex-shrink: 0; }
+    .subject-info { flex: 1; min-width: 0; }
+    .subject-name { font-size: 0.88rem; font-weight: 600; }
+    .subject-progress { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .subject-input { width: 70px !important; text-align: center; }
+
+    /* Goal item */
+    .goal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      background: var(--surface2);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .goal-item:hover { background: rgba(108,99,255,0.08); }
+    .goal-item.completed { opacity: 0.6; }
+    .goal-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+      margin-top: 1px;
+    }
+    .goal-check.done { background: var(--accent3); border-color: var(--accent3); color: #0f1a0f; }
+    .goal-text { flex: 1; font-size: 0.88rem; }
+    .goal-text.done { text-decoration: line-through; color: var(--text-muted); }
+    .goal-category { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* Expense row */
+    .expense-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    .expense-icon { font-size: 1.2rem; }
+    .expense-desc { flex: 1; font-size: 0.88rem; }
+    .expense-cat { font-size: 0.72rem; color: var(--text-muted); }
+    .expense-amount { font-weight: 700; color: var(--accent4); font-size: 0.95rem; }
+
+    /* Chips */
+    .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 5px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+    .chip.selected { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { max-width: 100vw; padding: 16px; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Animations */
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Weekly view */
+    .week-day-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .week-day-header {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .week-day-date { font-size: 0.75rem; color: var(--text-muted); }
+    .week-day-today .week-day-date { color: var(--accent); font-weight: 700; }
+
+    /* Tooltip */
+    [data-tooltip] { position: relative; }
+    [data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 100;
+    }
+    [data-tooltip]:hover::after { opacity: 1; }
+
+    .flex-row { display: flex; align-items: center; gap: 8px; }
+    .flex-col { display: flex; flex-direction: column; gap: 8px; }
+    .ml-auto { margin-left: auto; }
+    .mt-8 { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+    .mb-8 { margin-bottom: 8px; }
+    .mb-16 { margin-bottom: 16px; }
+    .text-sm { font-size: 0.82rem; }
+    .text-muted { color: var(--text-muted); }
+    .text-accent { color: var(--accent); }
+    .text-success { color: var(--accent3); }
+    .text-warning { color: var(--accent4); }
+    .text-danger { color: var(--accent2); }
+    .font-bold { font-weight: 700; }
+    .gap-16 { gap: 16px; }
+    .sections-stack { display: flex; flex-direction: column; gap: 20px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef, useMemo } = React;
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+const SUBJECTS = [
+  { id: 'acs', name: 'Advanced Control Systems', color: '#6c63ff', weeklyGoal: 10 },
+  { id: 'cwl', name: 'Communication 2 / Wireless', color: '#38f9d7', weeklyGoal: 8 },
+  { id: 'ca',  name: 'Computer Architecture',      color: '#f7971e', weeklyGoal: 8 },
+  { id: 'ger', name: 'German A1',                  color: '#ff6584', weeklyGoal: 5 },
+];
+const REPEAT_EXAMS = [
+  { id: 'ec',  name: 'Embedded Computing',  emoji: '💾' },
+  { id: 'nfc', name: 'NFC',                 emoji: '📡' },
+  { id: 'am',  name: 'Applied Maths',       emoji: '🧮' },
+  { id: 'nm',  name: 'Numerical Methods',   emoji: '🔢' },
+];
+const EXPENSE_CATS = [
+  { id: 'food',      label: 'Food & Drinks',     emoji: '🍕' },
+  { id: 'transport', label: 'Transport',          emoji: '🚌' },
+  { id: 'study',     label: 'Study Material',     emoji: '📚' },
+  { id: 'health',    label: 'Health/Gym',         emoji: '💊' },
+  { id: 'entertain', label: 'Entertainment',      emoji: '🎮' },
+  { id: 'grocery',   label: 'Groceries',          emoji: '🛒' },
+  { id: 'clothing',  label: 'Clothing',           emoji: '👕' },
+  { id: 'other',     label: 'Other',              emoji: '💸' },
+];
+const GOAL_CATS = [
+  { id: 'study',   label: 'Study',           emoji: '📚', color: '#6c63ff' },
+  { id: 'gym',     label: 'Gym',             emoji: '🏋️', color: '#43e97b' },
+  { id: 'job',     label: 'Job Application', emoji: '💼', color: '#38f9d7' },
+  { id: 'budget',  label: 'Budget',          emoji: '💰', color: '#f7971e' },
+  { id: 'health',  label: 'Health',          emoji: '💊', color: '#ff6584' },
+  { id: 'other',   label: 'Other',           emoji: '✨', color: '#8888aa' },
+];
+const NAV_ITEMS = [
+  { id: 'today',   label: 'Today',          icon: '🏠' },
+  { id: 'academic',label: 'Academic',       icon: '📚' },
+  { id: 'expenses',label: 'Expenses',       icon: '💸' },
+  { id: 'gym',     label: 'Gym',            icon: '🏋️' },
+  { id: 'jobs',    label: 'Job Apps',       icon: '💼' },
+  { id: 'goals',   label: 'Goals',          icon: '🎯' },
+  { id: 'weekly',  label: 'Weekly',         icon: '📊' },
+  { id: 'history', label: 'History',        icon: '🗓️' },
+];
+
+// ─── Storage helpers ──────────────────────────────────────────────────────────
+const STORE_KEY = 'rwu_dashboard_v2';
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    console.warn('Failed to load dashboard data:', e);
+    return {};
+  }
+}
+function saveData(data) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) {
+    console.warn('Failed to save dashboard data:', e);
+  }
+}
+
+// ─── Date utils ───────────────────────────────────────────────────────────────
+function toKey(d) {
+  return d.toISOString().slice(0, 10);
+}
+function todayKey() { return toKey(new Date()); }
+function offsetDate(d, n) {
+  const nd = new Date(d);
+  nd.setDate(nd.getDate() + n);
+  return nd;
+}
+function formatDate(d) {
+  return d.toLocaleDateString('en', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+function shortDate(d) {
+  return d.toLocaleDateString('en', { day: 'numeric', month: 'short' });
+}
+function getWeekDates(d) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const mon = new Date(d); mon.setDate(d.getDate() + diff);
+  return Array.from({ length: 7 }, (_, i) => offsetDate(mon, i));
+}
+function formatTime(hours) {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+}
+
+// ─── Default day data ─────────────────────────────────────────────────────────
+function defaultDay() {
+  return {
+    study: Object.fromEntries(SUBJECTS.map(s => [s.id, 0])),
+    repeatExams: [],
+    expenses: [],
+    gym: { done: false, notes: '', type: '', duration: '' },
+    jobApps: { count: 0, companies: '' },
+    workHours: 0,
+    notes: '',
+    goalsForTomorrow: [],
+    goals: [],   // goals set for this day
+    goalCompletions: {},
+  };
+}
+
+// ─── Merge helper ─────────────────────────────────────────────────────────────
+function mergeDay(existing) {
+  const def = defaultDay();
+  const merged = { ...def, ...existing };
+  merged.study = { ...def.study, ...(existing.study || {}) };
+  merged.gym = { ...def.gym, ...(existing.gym || {}) };
+  merged.jobApps = { ...def.jobApps, ...(existing.jobApps || {}) };
+  return merged;
+}
+
+// ─── Progress Ring SVG ────────────────────────────────────────────────────────
+function ProgressRing({ value, max, size = 80, stroke = 8, color = '#6c63ff', label, sub }) {
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const pct = max > 0 ? Math.min(value / max, 1) : 0;
+  const offset = circ * (1 - pct);
+  return (
+    <div className="progress-ring-container">
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size/2} cy={size/2} r={r} stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size/2} cy={size/2} r={r}
+          stroke={color} strokeWidth={stroke} fill="none"
+          strokeDasharray={circ} strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+        />
+      </svg>
+      {label && <div className="progress-ring-value" style={{ color }}>{label}</div>}
+      {sub && <div className="progress-ring-label">{sub}</div>}
+    </div>
+  );
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function ToastContainer({ toasts }) {
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className="toast">
+          <span>{t.icon || '✅'}</span>
+          <span>{t.msg}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Mini bar chart ───────────────────────────────────────────────────────────
+function MiniBarChart({ data, height = 80, colorFn }) {
+  const maxVal = Math.max(...data.map(d => d.value), 1);
+  return (
+    <div className="bar-chart" style={{ height }}>
+      {data.map((d, i) => (
+        <div key={i} className="bar-wrap" data-tooltip={`${d.label}: ${d.value}`}>
+          <div
+            className="bar"
+            style={{
+              height: `${(d.value / maxVal) * 100}%`,
+              background: colorFn ? colorFn(d, i) : 'var(--accent)',
+              opacity: d.today ? 1 : 0.6,
+            }}
+          />
+          <div className="bar-label">{d.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main App ─────────────────────────────────────────────────────────────────
+function App() {
+  const [allData, setAllData] = useState(() => loadData());
+  const [currentPage, setCurrentPage] = useState('today');
+  const [viewDate, setViewDate] = useState(new Date());
+  const [toasts, setToasts] = useState([]);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const viewKey = toKey(viewDate);
+  const todayK = todayKey();
+
+  const toast = useCallback((msg, icon) => {
+    const id = Date.now();
+    setToasts(t => [...t, { id, msg, icon }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3000);
+  }, []);
+
+  // Get day data
+  const getDay = useCallback((key) => {
+    return mergeDay(allData[key] || {});
+  }, [allData]);
+
+  const updateDay = useCallback((key, updater) => {
+    setAllData(prev => {
+      const existing = mergeDay(prev[key] || {});
+      const updated = typeof updater === 'function' ? updater(existing) : { ...existing, ...updater };
+      const next = { ...prev, [key]: updated };
+      saveData(next);
+      return next;
+    });
+  }, []);
+
+  const day = getDay(viewKey);
+  const isToday = viewKey === todayK;
+
+  // Compute total study hours for a day
+  const totalStudyHours = (d) => Object.values(d.study || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+  // Compute total expenses
+  const totalExpenses = (d) => (d.expenses || []).reduce((a, e) => a + (Number(e.amount) || 0), 0);
+
+  // ─── Goal completion score ─────────────────────────────────────────────────
+  const goalScore = useMemo(() => {
+    const goals = day.goals || [];
+    if (!goals.length) return null;
+    const done = goals.filter(g => day.goalCompletions?.[g.id]).length;
+    return Math.round((done / goals.length) * 100);
+  }, [day]);
+
+  // ─── Week data for weekly view ─────────────────────────────────────────────
+  const weekDates = useMemo(() => getWeekDates(viewDate), [viewDate]);
+
+  // ─── Page rendering ────────────────────────────────────────────────────────
+  const pages = {
+    today: <TodayPage day={day} viewKey={viewKey} isToday={isToday} updateDay={updateDay} toast={toast} goalScore={goalScore} totalStudyHours={totalStudyHours} totalExpenses={totalExpenses} setShowGoalModal={setShowGoalModal} setShowExpenseModal={setShowExpenseModal} />,
+    academic: <AcademicPage day={day} viewKey={viewKey} updateDay={updateDay} toast={toast} getDay={getDay} weekDates={weekDates} />,
+    expenses: <ExpensesPage day={day} viewKey={viewKey} updateDay={updateDay} toast={toast} getDay={getDay} allData={allData} setShowExpenseModal={setShowExpenseModal} />,
+    gym: <GymPage day={day} viewKey={viewKey} updateDay={updateDay} toast={toast} allData={allData} />,
+    jobs: <JobsPage day={day} viewKey={viewKey} updateDay={updateDay} toast={toast} allData={allData} />,
+    goals: <GoalsPage day={day} viewKey={viewKey} isToday={isToday} updateDay={updateDay} toast={toast} setShowGoalModal={setShowGoalModal} goalScore={goalScore} />,
+    weekly: <WeeklyPage weekDates={weekDates} getDay={getDay} totalStudyHours={totalStudyHours} totalExpenses={totalExpenses} />,
+    history: <HistoryPage allData={allData} getDay={getDay} totalStudyHours={totalStudyHours} totalExpenses={totalExpenses} setCurrentPage={setCurrentPage} setViewDate={setViewDate} />,
+  };
+
+  return (
+    <div className="app-container">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="logo">
+          <span>📊</span>
+          <div>
+            <div>RWU Dashboard</div>
+            <span className="logo-sub">MSc EES · Siddhant</span>
+          </div>
+        </div>
+        <div className="nav-section-title">Navigation</div>
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.id}
+            className={`nav-item${currentPage === item.id ? ' active' : ''}`}
+            onClick={() => setCurrentPage(item.id)}
+          >
+            <span className="nav-icon">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+        <div style={{ marginTop: 'auto', paddingTop: 16 }}>
+          <div className="text-sm text-muted" style={{ padding: '8px 14px' }}>
+            📅 {formatDate(new Date())}
+          </div>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <main className="main-content">
+        {/* Mobile header */}
+        <div className="flex-row mb-16" style={{ display: 'flex' }}>
+          <div style={{ display: 'none' }}>
+            <button className="btn-icon" onClick={() => setMobileNavOpen(v => !v)}>☰</button>
+          </div>
+          <div className="date-nav ml-auto">
+            <button className="btn-icon" onClick={() => setViewDate(d => offsetDate(d, -1))}>◀</button>
+            <span className="date-display">{isToday ? '📍 Today' : formatDate(viewDate)}</span>
+            <button className="btn-icon" onClick={() => setViewDate(d => offsetDate(d, 1))} disabled={viewKey >= todayK}>▶</button>
+            {!isToday && (
+              <button className="btn btn-sm btn-outline" onClick={() => setViewDate(new Date())}>Today</button>
+            )}
+          </div>
+        </div>
+
+        <div className="fade-in" key={currentPage + viewKey}>
+          {pages[currentPage]}
+        </div>
+      </main>
+
+      {/* Modals */}
+      {showGoalModal && (
+        <GoalModal
+          day={day}
+          viewKey={viewKey}
+          updateDay={updateDay}
+          onClose={() => setShowGoalModal(false)}
+          toast={toast}
+        />
+      )}
+      {showExpenseModal && (
+        <ExpenseModal
+          viewKey={viewKey}
+          updateDay={updateDay}
+          onClose={() => setShowExpenseModal(false)}
+          toast={toast}
+        />
+      )}
+
+      <ToastContainer toasts={toasts} />
+    </div>
+  );
+}
+
+// ─── TODAY PAGE ───────────────────────────────────────────────────────────────
+function TodayPage({ day, viewKey, isToday, updateDay, toast, goalScore, totalStudyHours, totalExpenses, setShowGoalModal, setShowExpenseModal }) {
+  const studyH = totalStudyHours(day);
+  const expTotal = totalExpenses(day);
+  const completedGoals = (day.goals || []).filter(g => day.goalCompletions?.[g.id]).length;
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">👋 Dashboard</div>
+          <div className="page-subtitle">MSc EES · Ravensburg Weingarten University</div>
+        </div>
+        <div className="flex-row">
+          <button className="btn btn-primary" onClick={() => setShowExpenseModal(true)}>＋ Expense</button>
+          <button className="btn btn-outline" onClick={() => setShowGoalModal(true)}>🎯 Goals</button>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 16 }}>
+        <StatCard icon="📚" label="Study Hours" value={`${studyH}h`} sub={`/ ${SUBJECTS.reduce((a,s)=>a+s.weeklyGoal,0)}h week goal`} color="var(--accent)" />
+        <StatCard icon="💸" label="Today's Spend" value={`€${expTotal.toFixed(2)}`} sub={`${day.expenses?.length || 0} transactions`} color="var(--accent4)" />
+        <StatCard icon="🏋️" label="Gym" value={day.gym?.done ? '✅ Done' : '—'} sub={day.gym?.type || 'Not logged'} color="var(--accent3)" />
+        <StatCard icon="💼" label="Job Apps" value={day.jobApps?.count || 0} sub="applications today" color="var(--accent5)" />
+        <StatCard icon="⏱️" label="Work Hours" value={`${day.workHours || 0}h`} sub="productive today" color="var(--accent2)" />
+      </div>
+
+      {/* Goals progress */}
+      {day.goals?.length > 0 && (
+        <div className="card">
+          <div className="card-title">🎯 Today's Goals
+            <span className="tag tag-accent ml-auto">
+              {completedGoals}/{day.goals.length} done
+            </span>
+          </div>
+          <div className="flex-row mb-8">
+            <div className="progress-bar-wrap" style={{ flex: 1 }}>
+              <div
+                className="progress-bar-fill"
+                style={{
+                  width: `${goalScore || 0}%`,
+                  background: goalScore >= 80 ? 'var(--accent3)' : goalScore >= 50 ? 'var(--accent4)' : 'var(--accent2)',
+                }}
+              />
+            </div>
+            <span className="font-bold" style={{ minWidth: 40 }}>{goalScore || 0}%</span>
+          </div>
+          <div>
+            {(day.goals || []).slice(0, 4).map(g => {
+              const done = day.goalCompletions?.[g.id];
+              return (
+                <div
+                  key={g.id}
+                  className={`goal-item${done ? ' completed' : ''}`}
+                  onClick={() => updateDay(viewKey, d => ({
+                    ...d,
+                    goalCompletions: { ...d.goalCompletions, [g.id]: !d.goalCompletions?.[g.id] }
+                  }))}
+                >
+                  <div className={`goal-check${done ? ' done' : ''}`}>{done ? '✓' : ''}</div>
+                  <div>
+                    <div className={`goal-text${done ? ' done' : ''}`}>{g.text}</div>
+                    <div className="goal-category">{GOAL_CATS.find(c => c.id === g.category)?.emoji} {GOAL_CATS.find(c => c.id === g.category)?.label}</div>
+                  </div>
+                </div>
+              );
+            })}
+            {day.goals.length > 4 && (
+              <div className="text-sm text-muted mt-8">+ {day.goals.length - 4} more goals</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Subject rings */}
+      <div className="card">
+        <div className="card-title">📚 Today's Study</div>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'space-around' }}>
+          {SUBJECTS.map(s => {
+            const h = Number(day.study?.[s.id]) || 0;
+            return (
+              <ProgressRing
+                key={s.id}
+                value={h}
+                max={s.weeklyGoal / 5}
+                size={90}
+                stroke={9}
+                color={s.color}
+                label={`${h}h`}
+                sub={s.name.split(' ')[0]}
+              />
+            );
+          })}
+          <ProgressRing
+            value={studyH}
+            max={SUBJECTS.reduce((a,s)=>a+s.weeklyGoal/5,0)}
+            size={90}
+            stroke={9}
+            color="white"
+            label={`${studyH}h`}
+            sub="Total"
+          />
+        </div>
+        {day.repeatExams?.length > 0 && (
+          <div className="flex-row mt-16" style={{ flexWrap: 'wrap', gap: 6 }}>
+            <span className="text-sm text-muted">Repeat prep:</span>
+            {day.repeatExams.map(id => {
+              const re = REPEAT_EXAMS.find(r => r.id === id);
+              return re ? <span key={id} className="tag tag-warning">{re.emoji} {re.name}</span> : null;
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Quick log */}
+      <div className="grid-2">
+        <QuickStudyCard day={day} viewKey={viewKey} updateDay={updateDay} toast={toast} />
+        <QuickGymCard day={day} viewKey={viewKey} updateDay={updateDay} toast={toast} />
+      </div>
+
+      {/* Working hours */}
+      <div className="card">
+        <div className="card-title">⏱️ Total Working Hours Today</div>
+        <div className="text-sm text-muted mb-8">Combined productive hours (study + job search + projects)</div>
+        <div className="flex-row">
+          <button className="btn btn-outline" onClick={() => updateDay(viewKey, d => ({ ...d, workHours: Math.max(0, (Number(d.workHours)||0) - 0.5) }))}>−</button>
+          <div style={{ flex: 1, textAlign: 'center' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent2)' }}>{day.workHours || 0}</span>
+            <span className="text-muted text-sm"> hours</span>
+          </div>
+          <button className="btn btn-outline" onClick={() => updateDay(viewKey, d => ({ ...d, workHours: (Number(d.workHours)||0) + 0.5 }))}>＋</button>
+        </div>
+        <div className="mt-8">
+          <input
+            type="number"
+            min="0" max="24" step="0.5"
+            value={day.workHours || ''}
+            onChange={e => {
+              const val = parseFloat(e.target.value);
+              updateDay(viewKey, d => ({ ...d, workHours: isNaN(val) ? 0 : Math.max(0, val) }));
+            }}
+            placeholder="Or enter directly…"
+          />
+        </div>
+      </div>
+
+      {/* Recent expenses */}
+      {day.expenses?.length > 0 && (
+        <div className="card">
+          <div className="card-title">💸 Today's Expenses</div>
+          {day.expenses.slice(-5).reverse().map(e => {
+            const cat = EXPENSE_CATS.find(c => c.id === e.category);
+            return (
+              <div key={e.id} className="expense-row">
+                <span className="expense-icon">{cat?.emoji || '💸'}</span>
+                <div style={{ flex: 1 }}>
+                  <div className="expense-desc">{e.desc || cat?.label}</div>
+                  <div className="expense-cat">{cat?.label}</div>
+                </div>
+                <span className="expense-amount">€{Number(e.amount).toFixed(2)}</span>
+              </div>
+            );
+          })}
+          <div className="divider" />
+          <div className="flex-row">
+            <span className="text-sm text-muted">Total</span>
+            <span className="font-bold ml-auto" style={{ color: 'var(--accent4)' }}>€{expTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Day notes */}
+      <div className="card">
+        <div className="card-title">📝 Day Notes</div>
+        <textarea
+          placeholder="How did today go? Any reflections…"
+          value={day.notes || ''}
+          onChange={e => updateDay(viewKey, d => ({ ...d, notes: e.target.value }))}
+          style={{ minHeight: 80 }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, sub, color }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-icon">{icon}</div>
+      <div className="stat-value" style={{ color }}>{value}</div>
+      <div className="stat-label">{label}</div>
+      {sub && <div className="text-sm text-muted">{sub}</div>}
+    </div>
+  );
+}
+
+function QuickStudyCard({ day, viewKey, updateDay, toast }) {
+  const [subj, setSubj] = useState(SUBJECTS[0].id);
+  const [hours, setHours] = useState('');
+
+  const log = () => {
+    const h = parseFloat(hours);
+    if (!h || h <= 0) return;
+    updateDay(viewKey, d => ({ ...d, study: { ...d.study, [subj]: (Number(d.study?.[subj]) || 0) + h } }));
+    toast(`+${h}h logged for ${SUBJECTS.find(s=>s.id===subj)?.name.split(' ')[0]}`, '📚');
+    setHours('');
+  };
+
+  return (
+    <div className="card">
+      <div className="card-title">📚 Log Study</div>
+      <div className="form-group mb-8">
+        <label>Subject</label>
+        <select value={subj} onChange={e => setSubj(e.target.value)}>
+          {SUBJECTS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </div>
+      <div className="form-group mb-8">
+        <label>Hours</label>
+        <input type="number" min="0.25" max="12" step="0.25" value={hours} onChange={e => setHours(e.target.value)} placeholder="e.g. 1.5" />
+      </div>
+      <div className="form-group mb-8">
+        <label>Repeat Exam Prep</label>
+        <div className="chip-group">
+          {REPEAT_EXAMS.map(r => (
+            <button
+              key={r.id}
+              className={`chip${day.repeatExams?.includes(r.id) ? ' selected' : ''}`}
+              onClick={() => updateDay(viewKey, d => ({
+                ...d,
+                repeatExams: d.repeatExams?.includes(r.id) ? d.repeatExams.filter(x=>x!==r.id) : [...(d.repeatExams||[]), r.id]
+              }))}
+            >{r.emoji} {r.name.split(' ')[0]}</button>
+          ))}
+        </div>
+      </div>
+      <button className="btn btn-primary" style={{ width: '100%' }} onClick={log}>Log Hours</button>
+    </div>
+  );
+}
+
+function QuickGymCard({ day, viewKey, updateDay, toast }) {
+  const gym = day.gym || {};
+  const toggle = () => {
+    updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, done: !d.gym?.done } }));
+    toast(gym.done ? 'Gym unmarked' : '💪 Gym checked off!', gym.done ? '❌' : '✅');
+  };
+  return (
+    <div className="card">
+      <div className="card-title">🏋️ Gym Today</div>
+      <div className="toggle-row mb-8">
+        <label className="toggle">
+          <input type="checkbox" checked={gym.done || false} onChange={toggle} />
+          <span className="toggle-slider" />
+        </label>
+        <span style={{ fontWeight: gym.done ? 700 : 400, color: gym.done ? 'var(--accent3)' : 'var(--text-muted)' }}>
+          {gym.done ? '✅ Done!' : 'Not yet'}
+        </span>
+      </div>
+      <div className="form-group mb-8">
+        <label>Workout Type</label>
+        <input value={gym.type || ''} onChange={e => updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, type: e.target.value } }))} placeholder="e.g. Push, Cardio, Legs…" />
+      </div>
+      <div className="form-group mb-8">
+        <label>Duration (min)</label>
+        <input type="number" value={gym.duration || ''} onChange={e => updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, duration: e.target.value } }))} placeholder="e.g. 60" />
+      </div>
+      <div className="form-group">
+        <label>Notes</label>
+        <input value={gym.notes || ''} onChange={e => updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, notes: e.target.value } }))} placeholder="How did it go?" />
+      </div>
+    </div>
+  );
+}
+
+// ─── ACADEMIC PAGE ────────────────────────────────────────────────────────────
+function AcademicPage({ day, viewKey, updateDay, toast, getDay, weekDates }) {
+  const weekStudy = useMemo(() => {
+    return SUBJECTS.map(s => ({
+      ...s,
+      weekly: weekDates.reduce((a, d) => a + (Number(getDay(toKey(d)).study?.[s.id]) || 0), 0),
+    }));
+  }, [weekDates, getDay]);
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">📚 Academic Tracker</div>
+          <div className="page-subtitle">Daily study log & weekly progress</div>
+        </div>
+      </div>
+
+      {/* Subject cards */}
+      <div className="grid-2">
+        {SUBJECTS.map(s => {
+          const todayH = Number(day.study?.[s.id]) || 0;
+          const weekH = weekStudy.find(x => x.id === s.id)?.weekly || 0;
+          return (
+            <div key={s.id} className="card">
+              <div className="card-title">
+                <span style={{ color: s.color, fontSize: '0.7rem' }}>●</span>
+                {s.name}
+              </div>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
+                <ProgressRing value={weekH} max={s.weeklyGoal} size={70} stroke={7} color={s.color} label={`${weekH}h`} sub="/ week" />
+                <div style={{ flex: 1 }}>
+                  <div className="text-sm text-muted mb-8">Log hours today:</div>
+                  <div className="flex-row">
+                    <button className="btn btn-sm btn-outline" onClick={() => {
+                      const cur = Number(day.study?.[s.id]) || 0;
+                      if (cur > 0) updateDay(viewKey, d => ({ ...d, study: { ...d.study, [s.id]: Math.max(0, cur - 0.5) } }));
+                    }}>-</button>
+                    <span style={{ minWidth: 50, textAlign: 'center', fontWeight: 700 }}>{todayH}h</span>
+                    <button className="btn btn-sm btn-outline" onClick={() => {
+                      updateDay(viewKey, d => ({ ...d, study: { ...d.study, [s.id]: (Number(d.study?.[s.id])||0) + 0.5 } }));
+                    }}>+</button>
+                  </div>
+                  <div className="text-sm text-muted mt-8">
+                    Week: {weekH}h / {s.weeklyGoal}h goal
+                  </div>
+                  <div className="progress-bar-wrap mt-8">
+                    <div className="progress-bar-fill" style={{ width: `${Math.min(weekH/s.weeklyGoal*100, 100)}%`, background: s.color }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Repeat Exam Prep */}
+      <div className="card">
+        <div className="card-title">🔄 Repeat Exam Prep</div>
+        <div className="text-sm text-muted mb-8">Mark subjects you worked on today:</div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {REPEAT_EXAMS.map(r => {
+            const active = day.repeatExams?.includes(r.id);
+            return (
+              <div
+                key={r.id}
+                onClick={() => updateDay(viewKey, d => ({
+                  ...d,
+                  repeatExams: active ? (d.repeatExams||[]).filter(x=>x!==r.id) : [...(d.repeatExams||[]), r.id]
+                }))}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: 12,
+                  border: `2px solid ${active ? 'var(--accent4)' : 'var(--border)'}`,
+                  background: active ? 'rgba(247,151,30,0.12)' : 'var(--surface2)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: '1.5rem' }}>{r.emoji}</div>
+                <div style={{ fontWeight: active ? 700 : 400, color: active ? 'var(--accent4)' : 'var(--text)' }}>{r.name}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Weekly bar chart */}
+      <div className="card">
+        <div className="card-title">📊 Weekly Study by Subject</div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '8px', color: 'var(--text-muted)', fontWeight: 600 }}>Subject</th>
+                {weekDates.map(d => (
+                  <th key={toKey(d)} style={{ padding: '8px', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'center' }}>
+                    {d.toLocaleDateString('en', {weekday:'short'})}
+                  </th>
+                ))}
+                <th style={{ padding: '8px', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'center' }}>Total</th>
+                <th style={{ padding: '8px', color: 'var(--text-muted)', fontWeight: 600, textAlign: 'center' }}>Goal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SUBJECTS.map(s => {
+                const days = weekDates.map(d => Number(getDay(toKey(d)).study?.[s.id]) || 0);
+                const total = days.reduce((a,b)=>a+b, 0);
+                return (
+                  <tr key={s.id} style={{ borderTop: '1px solid var(--border)' }}>
+                    <td style={{ padding: '10px 8px' }}>
+                      <div className="flex-row">
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, display: 'inline-block' }}></span>
+                        <span>{s.name}</span>
+                      </div>
+                    </td>
+                    {days.map((h, i) => (
+                      <td key={i} style={{ textAlign: 'center', padding: '10px 8px', color: h > 0 ? s.color : 'var(--text-muted)' }}>
+                        {h > 0 ? `${h}h` : '–'}
+                      </td>
+                    ))}
+                    <td style={{ textAlign: 'center', padding: '10px 8px', fontWeight: 700, color: total >= s.weeklyGoal ? 'var(--accent3)' : 'var(--text)' }}>
+                      {total}h
+                    </td>
+                    <td style={{ textAlign: 'center', padding: '10px 8px', color: 'var(--text-muted)' }}>{s.weeklyGoal}h</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── EXPENSES PAGE ────────────────────────────────────────────────────────────
+function ExpensesPage({ day, viewKey, updateDay, toast, getDay, allData, setShowExpenseModal }) {
+  const [activeTab, setActiveTab] = useState('day');
+
+  const deleteExpense = (id) => {
+    updateDay(viewKey, d => ({ ...d, expenses: (d.expenses||[]).filter(e => e.id !== id) }));
+    toast('Expense removed', '🗑️');
+  };
+
+  // Category totals for today
+  const catTotals = useMemo(() => {
+    const totals = {};
+    (day.expenses || []).forEach(e => {
+      totals[e.category] = (totals[e.category] || 0) + Number(e.amount);
+    });
+    return totals;
+  }, [day.expenses]);
+
+  // Last 30 days data
+  const last30 = useMemo(() => {
+    const result = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = offsetDate(new Date(), -i);
+      const k = toKey(d);
+      const dayD = getDay(k);
+      result.push({
+        date: d,
+        key: k,
+        total: (dayD.expenses || []).reduce((a, e) => a + Number(e.amount), 0),
+      });
+    }
+    return result;
+  }, [allData, getDay]);
+
+  const totalToday = day.expenses?.reduce((a,e)=>a+Number(e.amount),0) || 0;
+  const avg30 = last30.length ? last30.reduce((a,d)=>a+d.total,0)/30 : 0;
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">💸 Expenses</div>
+          <div className="page-subtitle">Track your spending in EUR</div>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowExpenseModal(true)}>＋ Add Expense</button>
+      </div>
+
+      <div className="grid-3">
+        <StatCard icon="📅" label="Today" value={`€${totalToday.toFixed(2)}`} sub={`${day.expenses?.length||0} items`} color="var(--accent4)" />
+        <StatCard icon="📆" label="30-Day Avg" value={`€${avg30.toFixed(2)}/day`} sub="rolling average" color="var(--accent)" />
+        <StatCard icon="📊" label="This Month" value={`€${last30.slice(-30).reduce((a,d)=>a+d.total,0).toFixed(2)}`} sub="last 30 days" color="var(--accent5)" />
+      </div>
+
+      <div className="tabs">
+        {['day','week','month'].map(t => (
+          <button key={t} className={`tab${activeTab===t?' active':''}`} onClick={()=>setActiveTab(t)}>
+            {t === 'day' ? 'Today' : t === 'week' ? 'This Week' : '30 Days'}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'day' && (
+        <div className="grid-2">
+          <div className="card">
+            <div className="card-title">📋 Transactions</div>
+            {!day.expenses?.length && <div className="text-sm text-muted">No expenses yet.</div>}
+            {(day.expenses||[]).map(e => {
+              const cat = EXPENSE_CATS.find(c => c.id === e.category);
+              return (
+                <div key={e.id} className="expense-row">
+                  <span className="expense-icon">{cat?.emoji||'💸'}</span>
+                  <div style={{ flex: 1 }}>
+                    <div className="expense-desc">{e.desc || cat?.label}</div>
+                    <div className="expense-cat">{cat?.label} · {e.time}</div>
+                  </div>
+                  <span className="expense-amount">€{Number(e.amount).toFixed(2)}</span>
+                  <button className="btn-icon" onClick={() => deleteExpense(e.id)}>×</button>
+                </div>
+              );
+            })}
+          </div>
+          <div className="card">
+            <div className="card-title">🥧 By Category</div>
+            {Object.keys(catTotals).length === 0 && <div className="text-sm text-muted">No data yet.</div>}
+            {EXPENSE_CATS.filter(c => catTotals[c.id]).map(c => (
+              <div key={c.id} style={{ marginBottom: 12 }}>
+                <div className="flex-row mb-8">
+                  <span>{c.emoji} {c.label}</span>
+                  <span className="ml-auto font-bold" style={{ color: 'var(--accent4)' }}>€{(catTotals[c.id]||0).toFixed(2)}</span>
+                </div>
+                <div className="progress-bar-wrap">
+                  <div className="progress-bar-fill" style={{ width: `${(catTotals[c.id]||0)/totalToday*100}%`, background: 'var(--accent4)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'month' && (
+        <div className="card">
+          <div className="card-title">📈 30-Day Spending</div>
+          <MiniBarChart
+            data={last30.map((d, i) => ({
+              label: d.date.getDate(),
+              value: d.total,
+              today: d.key === toKey(new Date()),
+            }))}
+            height={120}
+            colorFn={(d) => d.today ? 'var(--accent4)' : 'rgba(247,151,30,0.5)'}
+          />
+        </div>
+      )}
+
+      {activeTab === 'week' && (
+        <WeekExpenseView getDay={getDay} />
+      )}
+    </div>
+  );
+}
+
+function WeekExpenseView({ getDay }) {
+  const weekDates = getWeekDates(new Date());
+  const data = weekDates.map(d => ({
+    label: d.toLocaleDateString('en',{weekday:'short'}),
+    value: (getDay(toKey(d)).expenses||[]).reduce((a,e)=>a+Number(e.amount),0),
+    today: toKey(d) === todayKey(),
+  }));
+  return (
+    <div className="card">
+      <div className="card-title">📊 This Week's Spending</div>
+      <MiniBarChart data={data} height={120} colorFn={(d) => d.today ? 'var(--accent4)' : 'rgba(247,151,30,0.5)'} />
+      <div className="divider" />
+      <div className="flex-row">
+        <span className="text-muted text-sm">Week Total</span>
+        <span className="ml-auto font-bold" style={{ color: 'var(--accent4)' }}>
+          €{data.reduce((a,d)=>a+d.value,0).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── GYM PAGE ─────────────────────────────────────────────────────────────────
+function GymPage({ day, viewKey, updateDay, toast, allData }) {
+  const gym = day.gym || {};
+
+  // Build streak calendar (last 28 days)
+  const last28 = useMemo(() => {
+    return Array.from({ length: 28 }, (_, i) => {
+      const d = offsetDate(new Date(), -(27 - i));
+      const k = toKey(d);
+      const raw = allData[k] || {};
+      return { date: d, key: k, done: raw.gym?.done || false };
+    });
+  }, [allData]);
+
+  const streak = useMemo(() => {
+    let s = 0;
+    for (let i = last28.length - 1; i >= 0; i--) {
+      if (last28[i].done) s++;
+      else break;
+    }
+    return s;
+  }, [last28]);
+
+  const totalGym = last28.filter(d => d.done).length;
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">🏋️ Gym Tracker</div>
+          <div className="page-subtitle">Stay consistent, stay strong</div>
+        </div>
+      </div>
+
+      <div className="grid-3">
+        <StatCard icon="🔥" label="Current Streak" value={`${streak} days`} sub="consecutive" color="var(--accent4)" />
+        <StatCard icon="📅" label="Last 28 Days" value={totalGym} sub="sessions" color="var(--accent3)" />
+        <StatCard icon="💪" label="Today" value={gym.done ? 'Done!' : 'Not yet'} sub={gym.type||'–'} color={gym.done?'var(--accent3)':'var(--text-muted)'} />
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-title">Today's Workout</div>
+          <div className="toggle-row mb-16">
+            <label className="toggle">
+              <input type="checkbox" checked={gym.done||false} onChange={() => {
+                updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, done: !d.gym?.done } }));
+                toast(gym.done ? 'Unmarked' : '💪 Great workout!', '');
+              }} />
+              <span className="toggle-slider" />
+            </label>
+            <span style={{ fontWeight: 700, fontSize: '1rem', color: gym.done ? 'var(--accent3)' : 'var(--text-muted)' }}>
+              {gym.done ? '✅ Workout Complete!' : 'Did you go to the gym?'}
+            </span>
+          </div>
+          <div className="form-group mb-8">
+            <label>Workout Type</label>
+            <select value={gym.type||''} onChange={e => updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, type: e.target.value } }))}>
+              <option value="">Select...</option>
+              {['Push','Pull','Legs','Chest & Triceps','Back & Biceps','Shoulders','Full Body','Cardio','HIIT','Yoga','Swimming','Other'].map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group mb-8">
+            <label>Duration (minutes)</label>
+            <input type="number" value={gym.duration||''} onChange={e => updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, duration: e.target.value } }))} placeholder="e.g. 60" />
+          </div>
+          <div className="form-group">
+            <label>Notes</label>
+            <textarea value={gym.notes||''} onChange={e => updateDay(viewKey, d => ({ ...d, gym: { ...d.gym, notes: e.target.value } }))} placeholder="PRs, how you felt, what you trained…" />
+          </div>
+        </div>
+
+        {/* Streak calendar */}
+        <div className="card">
+          <div className="card-title">🗓️ 28-Day Calendar</div>
+          <div className="text-sm text-muted mb-8">Green = gym day</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 6 }}>
+            {['Mo','Tu','We','Th','Fr','Sa','Su'].map(d => (
+              <div key={d} style={{ textAlign: 'center', fontSize: '0.65rem', color: 'var(--text-muted)', paddingBottom: 4 }}>{d}</div>
+            ))}
+            {last28.map((d, i) => (
+              <div
+                key={d.key}
+                data-tooltip={`${shortDate(d.date)}${d.done ? ' ✓' : ''}`}
+                style={{
+                  aspectRatio: '1',
+                  borderRadius: 6,
+                  background: d.done ? 'var(--accent3)' : 'var(--surface2)',
+                  border: d.key === viewKey ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.65rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {d.date.getDate()}
+              </div>
+            ))}
+          </div>
+          {streak >= 3 && (
+            <div className="mt-16" style={{ textAlign: 'center', padding: 12, background: 'rgba(67,233,123,0.1)', borderRadius: 10 }}>
+              <div style={{ fontSize: '2rem' }}>🔥</div>
+              <div className="font-bold" style={{ color: 'var(--accent3)' }}>{streak}-day streak!</div>
+              <div className="text-sm text-muted">Keep it up!</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── JOBS PAGE ────────────────────────────────────────────────────────────────
+function JobsPage({ day, viewKey, updateDay, toast, allData }) {
+  const [company, setCompany] = useState('');
+
+  const addCompany = () => {
+    if (!company.trim()) return;
+    updateDay(viewKey, d => ({
+      ...d,
+      jobApps: {
+        ...d.jobApps,
+        count: (d.jobApps?.count || 0) + 1,
+        companies: d.jobApps?.companies ? d.jobApps.companies + ', ' + company.trim() : company.trim(),
+      }
+    }));
+    toast(`Logged: ${company}`, '💼');
+    setCompany('');
+  };
+
+  // Last 30 days apps
+  const last30 = useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => {
+      const d = offsetDate(new Date(), -(29-i));
+      const k = toKey(d);
+      return { date: d, key: k, count: (allData[k]?.jobApps?.count)||0 };
+    });
+  }, [allData]);
+
+  const totalApps = last30.reduce((a,d)=>a+d.count,0);
+  const streak = (() => {
+    let s = 0;
+    for (let i = last30.length - 1; i >= 0; i--) {
+      if (last30[i].count > 0) s++;
+      else break;
+    }
+    return s;
+  })();
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">💼 Job Applications</div>
+          <div className="page-subtitle">Werkstudent & internship tracker</div>
+        </div>
+      </div>
+
+      <div className="grid-3">
+        <StatCard icon="📨" label="Today" value={day.jobApps?.count||0} sub="applications" color="var(--accent5)" />
+        <StatCard icon="📅" label="Last 30 Days" value={totalApps} sub="total sent" color="var(--accent)" />
+        <StatCard icon="🔥" label="Streak" value={`${streak}d`} sub="active days" color="var(--accent4)" />
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-title">Log Application</div>
+          <div className="form-group mb-8">
+            <label>Company Name</label>
+            <input value={company} onChange={e => setCompany(e.target.value)} placeholder="e.g. Bosch, ZF, Daimler…" onKeyDown={e => e.key === 'Enter' && addCompany()} />
+          </div>
+          <button className="btn btn-primary" style={{ width: '100%' }} onClick={addCompany}>＋ Log Application</button>
+          <div className="divider" />
+          <div className="flex-row">
+            <span className="text-muted text-sm">Total today:</span>
+            <span className="ml-auto font-bold" style={{ color: 'var(--accent5)' }}>{day.jobApps?.count||0} apps</span>
+          </div>
+          <div className="flex-row">
+            <button className="btn-icon" onClick={() => {
+              updateDay(viewKey, d => ({ ...d, jobApps: { ...d.jobApps, count: Math.max(0, (d.jobApps?.count||0)-1) } }));
+            }}>−</button>
+            <span className="text-sm text-muted">Manual adjust</span>
+            <button className="btn-icon" onClick={() => {
+              updateDay(viewKey, d => ({ ...d, jobApps: { ...d.jobApps, count: (d.jobApps?.count||0)+1 } }));
+            }}>＋</button>
+          </div>
+          {day.jobApps?.companies && (
+            <div className="mt-8">
+              <div className="text-sm text-muted mb-8">Companies:</div>
+              <div className="chip-group">
+                {day.jobApps.companies.split(',').map((c, i) => (
+                  <span key={i} className="tag tag-teal">{c.trim()}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="form-group mt-8">
+            <label>Notes / Follow-ups</label>
+            <textarea
+              value={day.jobApps?.notes||''}
+              onChange={e => updateDay(viewKey, d => ({ ...d, jobApps: { ...d.jobApps, notes: e.target.value } }))}
+              placeholder="Any follow-up notes, replies received…"
+            />
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">📊 30-Day Activity</div>
+          <MiniBarChart
+            data={last30.map(d => ({
+              label: d.date.getDate() % 5 === 0 ? d.date.getDate() : '',
+              value: d.count,
+              today: d.key === todayKey(),
+            }))}
+            height={120}
+            colorFn={(d) => d.today ? 'var(--accent5)' : 'rgba(56,249,215,0.5)'}
+          />
+          <div className="divider" />
+          <div className="flex-row">
+            <span className="text-sm text-muted">Avg per day:</span>
+            <span className="ml-auto font-bold">{(totalApps/30).toFixed(1)} apps</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── GOALS PAGE ───────────────────────────────────────────────────────────────
+function GoalsPage({ day, viewKey, isToday, updateDay, toast, setShowGoalModal, goalScore }) {
+  const goals = day.goals || [];
+  const tomorrowKey = toKey(offsetDate(new Date(), 1));
+  const tomorrowGoals = (JSON.parse(localStorage.getItem(STORE_KEY) || '{}')?.[tomorrowKey]?.goalsForTomorrow) || [];
+
+  const toggleGoal = (id) => {
+    updateDay(viewKey, d => ({
+      ...d,
+      goalCompletions: { ...d.goalCompletions, [id]: !d.goalCompletions?.[id] }
+    }));
+  };
+
+  const completedCount = goals.filter(g => day.goalCompletions?.[g.id]).length;
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">🎯 Goals</div>
+          <div className="page-subtitle">Set intentions, track execution</div>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowGoalModal(true)}>＋ Set Goals</button>
+      </div>
+
+      {/* Score display */}
+      {goals.length > 0 && (
+        <div className="card">
+          <div className="card-title">📊 Day Completion</div>
+          <div className="flex-row" style={{ gap: 32, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div className="score-big">{goalScore}%</div>
+              <div className="text-sm text-muted mt-8">completion rate</div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div className="flex-row mb-8">
+                <span className="text-sm text-muted">{completedCount} of {goals.length} goals done</span>
+              </div>
+              <div className="progress-bar-wrap">
+                <div className="progress-bar-fill" style={{
+                  width: `${goalScore}%`,
+                  background: goalScore >= 80 ? 'var(--accent3)' : goalScore >= 50 ? 'var(--accent4)' : 'var(--accent2)',
+                }} />
+              </div>
+              <div className="mt-8 text-sm" style={{ color: goalScore >= 80 ? 'var(--accent3)' : goalScore >= 50 ? 'var(--accent4)' : 'var(--accent2)' }}>
+                {goalScore >= 80 ? '🎉 Excellent day!' : goalScore >= 50 ? '👍 Good progress!' : goalScore > 0 ? '💪 Keep pushing!' : '📌 Start completing goals!'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Goals list */}
+      <div className="card">
+        <div className="card-title">Today's Goals</div>
+        {!goals.length ? (
+          <div style={{ textAlign: 'center', padding: '32px 0' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: 8 }}>🎯</div>
+            <div className="text-muted text-sm">No goals set for today.</div>
+            <div className="text-muted text-sm mt-8">Set goals the night before to track your day!</div>
+            <button className="btn btn-primary mt-16" onClick={() => setShowGoalModal(true)}>Set Goals for Tomorrow</button>
+          </div>
+        ) : (
+          <>
+            {GOAL_CATS.filter(cat => goals.some(g => g.category === cat.id)).map(cat => (
+              <div key={cat.id}>
+                <div className="text-sm text-muted mb-8 mt-8" style={{ fontWeight: 600 }}>
+                  {cat.emoji} {cat.label}
+                </div>
+                {goals.filter(g => g.category === cat.id).map(g => {
+                  const done = day.goalCompletions?.[g.id];
+                  return (
+                    <div key={g.id} className={`goal-item${done ? ' completed' : ''}`} onClick={() => toggleGoal(g.id)}>
+                      <div className={`goal-check${done ? ' done' : ''}`}>{done ? '✓' : ''}</div>
+                      <div>
+                        <div className={`goal-text${done ? ' done' : ''}`}>{g.text}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── WEEKLY PAGE ──────────────────────────────────────────────────────────────
+function WeeklyPage({ weekDates, getDay, totalStudyHours, totalExpenses }) {
+  const weekData = useMemo(() => weekDates.map(d => {
+    const k = toKey(d);
+    const day = getDay(k);
+    return {
+      date: d,
+      key: k,
+      label: d.toLocaleDateString('en',{weekday:'short'}),
+      studyH: totalStudyHours(day),
+      expenses: totalExpenses(day),
+      gym: day.gym?.done || false,
+      jobApps: day.jobApps?.count || 0,
+      workH: Number(day.workHours) || 0,
+      goalScore: (() => {
+        const goals = day.goals || [];
+        if (!goals.length) return null;
+        const done = goals.filter(g => day.goalCompletions?.[g.id]).length;
+        return Math.round((done / goals.length) * 100);
+      })(),
+    };
+  }), [weekDates, getDay]);
+
+  const maxStudy = Math.max(...weekData.map(d => d.studyH), 1);
+  const maxExp = Math.max(...weekData.map(d => d.expenses), 1);
+  const maxJobs = Math.max(...weekData.map(d => d.jobApps), 1);
+  const totalStudy = weekData.reduce((a,d)=>a+d.studyH,0);
+  const totalExp = weekData.reduce((a,d)=>a+d.expenses,0);
+  const totalJobs = weekData.reduce((a,d)=>a+d.jobApps,0);
+  const gymDays = weekData.filter(d=>d.gym).length;
+  const todayK = todayKey();
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">📊 Weekly Summary</div>
+          <div className="page-subtitle">
+            {shortDate(weekDates[0])} – {shortDate(weekDates[6])}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-4">
+        <StatCard icon="📚" label="Study Hours" value={`${totalStudy}h`} sub={`${SUBJECTS.reduce((a,s)=>a+s.weeklyGoal,0)}h goal`} color="var(--accent)" />
+        <StatCard icon="💸" label="Total Spent" value={`€${totalExp.toFixed(2)}`} sub={`€${(totalExp/7).toFixed(2)}/day avg`} color="var(--accent4)" />
+        <StatCard icon="🏋️" label="Gym Days" value={`${gymDays}/7`} sub="this week" color="var(--accent3)" />
+        <StatCard icon="💼" label="Job Apps" value={totalJobs} sub="applications" color="var(--accent5)" />
+      </div>
+
+      {/* Weekly grid */}
+      <div className="card">
+        <div className="card-title">📅 Day-by-Day Overview</div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <thead>
+              <tr>
+                <th style={{ padding: '8px', textAlign: 'left', color: 'var(--text-muted)' }}>Metric</th>
+                {weekData.map(d => (
+                  <th key={d.key} style={{ padding: '8px', textAlign: 'center', color: d.key === todayK ? 'var(--accent)' : 'var(--text-muted)' }}>
+                    <div>{d.label}</div>
+                    <div style={{ fontSize: '0.7rem' }}>{d.date.getDate()}</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { label: '📚 Study', key: 'studyH', fmt: v => v ? `${v}h` : '–', colorFn: (v, max) => v/max },
+                { label: '💸 Spend', key: 'expenses', fmt: v => v ? `€${v.toFixed(0)}` : '–', colorFn: (v, max) => v/max },
+                { label: '🏋️ Gym', key: 'gym', fmt: v => v ? '✅' : '–' },
+                { label: '💼 Apps', key: 'jobApps', fmt: v => v || '–', colorFn: (v, max) => v/max },
+                { label: '🎯 Goals', key: 'goalScore', fmt: v => v !== null ? `${v}%` : '–' },
+              ].map(row => (
+                <tr key={row.key} style={{ borderTop: '1px solid var(--border)' }}>
+                  <td style={{ padding: '10px 8px', fontWeight: 600 }}>{row.label}</td>
+                  {weekData.map(d => {
+                    const val = d[row.key];
+                    const intensity = row.colorFn ? row.colorFn(val, row.key === 'expenses' ? maxExp : row.key === 'studyH' ? maxStudy : maxJobs) : null;
+                    return (
+                      <td key={d.key} style={{
+                        padding: '10px 8px',
+                        textAlign: 'center',
+                        color: d.key === todayK ? 'var(--accent)' : (val ? 'var(--text)' : 'var(--text-muted)'),
+                        background: intensity ? `rgba(108,99,255,${intensity * 0.15})` : 'transparent',
+                        borderRadius: 4,
+                      }}>
+                        {row.fmt(val)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Subject weekly progress */}
+      <div className="card">
+        <div className="card-title">📚 Subject Progress This Week</div>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', justifyContent: 'space-around' }}>
+          {SUBJECTS.map(s => {
+            const weekH = weekData.reduce((a, d) => a + (Number(getDay(d.key).study?.[s.id])||0), 0);
+            return (
+              <ProgressRing
+                key={s.id}
+                value={weekH}
+                max={s.weeklyGoal}
+                size={90}
+                stroke={8}
+                color={s.color}
+                label={`${weekH}h`}
+                sub={`${s.name.split(' ')[0]} (${s.weeklyGoal}h)`}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Study heatmap for week */}
+      <div className="card">
+        <div className="card-title">🔥 Study Intensity</div>
+        <div className="bar-chart" style={{ height: 120 }}>
+          {weekData.map(d => (
+            <div key={d.key} className="bar-wrap">
+              <div
+                className="bar"
+                data-tooltip={`${d.label}: ${d.studyH}h`}
+                style={{
+                  height: `${(d.studyH / maxStudy) * 100}%`,
+                  background: `linear-gradient(to top, var(--accent), var(--accent5))`,
+                  opacity: d.key === todayK ? 1 : 0.7,
+                }}
+              />
+              <div className="bar-label">{d.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HISTORY PAGE ─────────────────────────────────────────────────────────────
+function HistoryPage({ allData, getDay, totalStudyHours, totalExpenses, setCurrentPage, setViewDate }) {
+  const [viewMode, setViewMode] = useState('list');
+  const [monthOffset, setMonthOffset] = useState(0);
+
+  // Build last 90 days
+  const days = useMemo(() => {
+    return Array.from({ length: 90 }, (_, i) => {
+      const d = offsetDate(new Date(), -(89-i));
+      const k = toKey(d);
+      const day = getDay(k);
+      return {
+        date: d,
+        key: k,
+        hasData: !!allData[k],
+        studyH: totalStudyHours(day),
+        expenses: totalExpenses(day),
+        gym: day.gym?.done || false,
+        jobApps: day.jobApps?.count || 0,
+        goalScore: (() => {
+          const goals = day.goals || [];
+          if (!goals.length) return null;
+          const done = goals.filter(g => day.goalCompletions?.[g.id]).length;
+          return Math.round((done / goals.length) * 100);
+        })(),
+      };
+    });
+  }, [allData, getDay]);
+
+  const heatmapMax = Math.max(...days.map(d => d.studyH), 1);
+
+  const navigateTo = (date) => {
+    setViewDate(date);
+    setCurrentPage('today');
+  };
+
+  return (
+    <div className="sections-stack">
+      <div className="page-header">
+        <div>
+          <div className="page-title">🗓️ History</div>
+          <div className="page-subtitle">Review past days & patterns</div>
+        </div>
+        <div className="tabs" style={{ maxWidth: 200 }}>
+          <button className={`tab${viewMode==='list'?' active':''}`} onClick={()=>setViewMode('list')}>List</button>
+          <button className={`tab${viewMode==='heat'?' active':''}`} onClick={()=>setViewMode('heat')}>Heatmap</button>
+        </div>
+      </div>
+
+      {viewMode === 'heat' && (
+        <div className="card">
+          <div className="card-title">📊 Study Heatmap (90 days)</div>
+          <div className="text-sm text-muted mb-8">Darker = more study hours</div>
+          <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+            {days.map(d => (
+              <div
+                key={d.key}
+                data-tooltip={`${shortDate(d.date)}: ${d.studyH}h study`}
+                onClick={() => navigateTo(d.date)}
+                style={{
+                  width: 14, height: 14,
+                  borderRadius: 2,
+                  background: d.studyH > 0
+                    ? `rgba(108,99,255,${0.2 + (d.studyH / heatmapMax) * 0.8})`
+                    : 'var(--surface2)',
+                  cursor: 'pointer',
+                  transition: 'transform 0.1s',
+                }}
+                title={`${shortDate(d.date)}: ${d.studyH}h`}
+              />
+            ))}
+          </div>
+          <div className="flex-row mt-8" style={{ gap: 4 }}>
+            <span className="text-sm text-muted">Less</span>
+            {[0.1,0.3,0.5,0.7,1.0].map(v => (
+              <div key={v} style={{ width: 14, height: 14, borderRadius: 2, background: `rgba(108,99,255,${v * 0.8 + 0.1})` }} />
+            ))}
+            <span className="text-sm text-muted">More</span>
+          </div>
+        </div>
+      )}
+
+      {viewMode === 'list' && (
+        <div className="card">
+          <div className="card-title">📋 Recent Days</div>
+          {[...days].reverse().slice(0, 30).map(d => (
+            <div
+              key={d.key}
+              className="list-item"
+              style={{ cursor: 'pointer' }}
+              onClick={() => navigateTo(d.date)}
+            >
+              <div style={{ minWidth: 80 }}>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>{shortDate(d.date)}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{d.date.toLocaleDateString('en',{weekday:'long'})}</div>
+              </div>
+              <div style={{ flex: 1, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {d.studyH > 0 && <span className="tag tag-accent">📚 {d.studyH}h</span>}
+                {d.expenses > 0 && <span className="tag tag-warning">💸 €{d.expenses.toFixed(0)}</span>}
+                {d.gym && <span className="tag tag-success">🏋️ Gym</span>}
+                {d.jobApps > 0 && <span className="tag tag-teal">💼 {d.jobApps} apps</span>}
+                {d.goalScore !== null && <span className="tag tag-danger">🎯 {d.goalScore}%</span>}
+                {!d.hasData && <span className="text-sm text-muted">No data</span>}
+              </div>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>→</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── GOAL MODAL ───────────────────────────────────────────────────────────────
+function GoalModal({ day, viewKey, updateDay, onClose, toast }) {
+  const [goals, setGoals] = useState(() => day.goalsForTomorrow || []);
+  const [text, setText] = useState('');
+  const [category, setCategory] = useState('study');
+  const tomorrowKey = toKey(offsetDate(new Date(), 1));
+
+  const addGoal = () => {
+    if (!text.trim()) return;
+    const g = { id: Date.now().toString(), text: text.trim(), category };
+    setGoals(prev => [...prev, g]);
+    setText('');
+  };
+
+  const removeGoal = (id) => setGoals(prev => prev.filter(g => g.id !== id));
+
+  const save = () => {
+    // Save goals as tomorrow's active goals
+    updateDay(tomorrowKey, d => ({ ...d, goals: goals }));
+    updateDay(viewKey, d => ({ ...d, goalsForTomorrow: goals }));
+    toast(`${goals.length} goals set for tomorrow!`, '🎯');
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-title">🎯 Set Goals for Tomorrow</div>
+        <div className="form-group mb-8">
+          <label>Category</label>
+          <select value={category} onChange={e => setCategory(e.target.value)}>
+            {GOAL_CATS.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>)}
+          </select>
+        </div>
+        <div className="form-group mb-8">
+          <label>Goal</label>
+          <div className="flex-row">
+            <input
+              value={text}
+              onChange={e => setText(e.target.value)}
+              placeholder="e.g. Study Control Systems for 2h"
+              onKeyDown={e => e.key === 'Enter' && addGoal()}
+              style={{ flex: 1 }}
+            />
+            <button className="btn btn-primary btn-sm" onClick={addGoal}>Add</button>
+          </div>
+        </div>
+        <div className="divider" />
+        {!goals.length && <div className="text-sm text-muted mb-8">No goals added yet. Add some above!</div>}
+        {goals.map(g => {
+          const cat = GOAL_CATS.find(c => c.id === g.category);
+          return (
+            <div key={g.id} className="list-item" style={{ marginBottom: 6 }}>
+              <span>{cat?.emoji}</span>
+              <span style={{ flex: 1, fontSize: '0.88rem' }}>{g.text}</span>
+              <span className="tag tag-accent" style={{ fontSize: '0.7rem' }}>{cat?.label}</span>
+              <button className="btn-icon" onClick={() => removeGoal(g.id)}>×</button>
+            </div>
+          );
+        })}
+        <div className="divider" />
+        <div className="flex-row">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary ml-auto" onClick={save}>Save Goals ({goals.length})</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── EXPENSE MODAL ────────────────────────────────────────────────────────────
+function ExpenseModal({ viewKey, updateDay, onClose, toast }) {
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('food');
+  const [desc, setDesc] = useState('');
+
+  const save = () => {
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) return;
+    const expense = {
+      id: Date.now().toString(),
+      amount: amt,
+      category,
+      desc: desc.trim(),
+      time: new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    };
+    updateDay(viewKey, d => ({ ...d, expenses: [...(d.expenses||[]), expense] }));
+    toast(`€${amt.toFixed(2)} logged!`, EXPENSE_CATS.find(c=>c.id===category)?.emoji || '💸');
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-title">💸 Add Expense</div>
+        <div className="form-group mb-8">
+          <label>Amount (€)</label>
+          <input type="number" min="0.01" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="e.g. 3.50" autoFocus />
+        </div>
+        <div className="form-group mb-8">
+          <label>Category</label>
+          <div className="chip-group">
+            {EXPENSE_CATS.map(c => (
+              <button key={c.id} className={`chip${category===c.id?' selected':''}`} onClick={() => setCategory(c.id)}>
+                {c.emoji} {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="form-group mb-8">
+          <label>Description (optional)</label>
+          <input value={desc} onChange={e => setDesc(e.target.value)} placeholder="e.g. Döner at Marktplatz" onKeyDown={e => e.key === 'Enter' && save()} />
+        </div>
+        <div className="flex-row">
+          <button className="btn btn-outline" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary ml-auto" onClick={save}>Save Expense</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
