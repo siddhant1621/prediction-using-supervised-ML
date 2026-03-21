@@ -3,88 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ultimate</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Ultimate Dashboard</title>
+    <style>
+        body {
+            background-color: #001f3f; /* dark navy */
+            color: #00ffff; /* cyan accents */
+            font-family: Arial, sans-serif;
+        }
+        .tab {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        /* Add your styles for the dashboard here */
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Dashboard Ultimate</h1>
-    </header>
-    <section id="subjects">
-        <h2>Semester 2 Subjects</h2>
-        <ul>
-            <li>Advanced Control Systems</li>
-            <li>Communication 2/Wireless</li>
-            <li>Computer Architecture</li>
-            <li>German A1</li>
-            <li>Digital Filters and Algorithms</li>
-            <li>Lidar and Radar Systems</li>
-        </ul>
-    </section>
-    <section id="repeat-exams">
+    <h1>Ultimate Dashboard</h1>
+    <div id="tabs">
+        <button onclick="showTab('today')">Today</button>
+        <button onclick="showTab('repeat-exam')">Repeat Exam Prep</button>
+        <button onclick="showTab('goals')">Set Tomorrow's Goals</button>
+        <button onclick="showTab('weekly')">Weekly Overview</button>
+        <button onclick="showTab('history')">History Viewer</button>
+        <button onclick="showTab('expenses')">Expense Tracker</button>
+        <button onclick="showTab('gym')">Gym Logging</button>
+        <button onclick="showTab('applications')">Job Applications Counter</button>
+    </div>
+
+    <div id="today" class="tab active">
+        <h2>Today</h2>
+        <p>Your subjects for Semester 2:</p>
+        <ul id="subjects-list"></ul>
+        <script>
+            const subjects = ['Math', 'Science', 'English', 'History', 'Geography', 'Art', 'PE', 'Computer Science', 'Music', 'Drama'];
+            const subjectsList = document.getElementById('subjects-list');
+            subjects.forEach(subject => {
+                const li = document.createElement('li');
+                li.textContent = subject;
+                subjectsList.appendChild(li);
+            });
+        </script>
+    </div>
+
+    <div id="repeat-exam" class="tab">
         <h2>Repeat Exam Prep</h2>
-        <ul>
-            <li>Embedded Computing</li>
-            <li>NFC/Communication</li>
-            <li>Applied Mathematics</li>
-            <li>Numerical Methods</li>
-        </ul>
-    </section>
-    <section id="study-hour-tracking">
-        <h2>Study Hour Tracking</h2>
-        <div class="progress-bars">
-            <div class="subject">
-                <span>Subject 1</span>
-                <div class="progress-bar"><span style="width: 70%;"></span></div>
-            </div>
-            <div class="subject">
-                <span>Subject 2</span>
-                <div class="progress-bar"><span style="width: 50%;"></span></div>
-            </div>
-            <!-- Add more subjects as needed -->
+        <div>
+            <h3>Individual Hour Tracking</h3>
+            <div id="hour-tracking"></div>
+            <script>
+                // Implement hour tracking here
+            </script>
         </div>
-    </section>
-    <section id="goal-planning">
-        <h2>Goal Planning for Tomorrow</h2>
-        <form>
-            <label for="goal">Set your goal:</label>
-            <input type="text" id="goal" name="goal">
-            <button type="submit">Save Goal</button>
-        </form>
-    </section>
-    <section id="expense-tracker">
+    </div>
+
+    <div id="goals" class="tab">
+        <h2>Set Tomorrow's Goals</h2>
+        <input type="text" id="goal-input" placeholder="Enter your goal" />
+        <button onclick="setGoal()">Set Goal</button>
+        <script>
+            function setGoal() {
+                const goal = document.getElementById('goal-input').value;
+                localStorage.setItem('tomorrowGoal', goal);
+                alert('Goal set: ' + goal);
+            }
+        </script>
+    </div>
+
+    <div id="weekly" class="tab">
+        <h2>Weekly Overview</h2>
+        <div>
+            <h3>Analytics</h3>
+            <div id="weekly-analytics"></div>
+            <script>
+                // Implement weekly analytics overview here
+            </script>
+        </div>
+        <div id="gym-heatmap">Gym Heatmap</div>
+    </div>
+
+    <div id="history" class="tab">
+        <h2>History Viewer</h2>
+        <div id="history-log"></div>
+        <script>
+            // Implement history viewer here
+        </script>
+    </div>
+
+    <div id="expenses" class="tab">
         <h2>Expense Tracker</h2>
-        <div id="expense-categories">
-            <div class="category">Food: <span>$200</span></div>
-            <div class="category">Transport: <span>$100</span></div>
-            <div class="category">Other: <span>$50</span></div>
-            <!-- Add more categories as needed -->
+        <div>
+            <h3>Categories</h3>
+            <div id="expense-categories"></div>
+            <script>
+                // Implement expense tracker here
+            </script>
         </div>
-        <div id="donut-chart">Donut Chart Placeholder</div>
-    </section>
-    <section id="gym-logging">
+    </div>
+
+    <div id="gym" class="tab">
         <h2>Gym Logging</h2>
-        <div class="monthly-heatmap">Monthly Heatmap Placeholder</div>
-    </section>
-    <section id="productive-hours">
-        <h2>Productive Hours Breakdown</h2>
-        <div class="breakdown">Breakdown Placeholder</div>
-    </section>
-    <section id="job-applications">
-        <h2>Job Applications</h2>
-        <div class="streak-counter">Applications Streak: <span>5</span></div>
-    </section>
-    <section id="day-score">
-        <h2>Day Score Calculation</h2>
-        <div class="score">Score: <span>85</span></div>
-    </section>
-    <section id="weekly-analytics">
-        <h2>Weekly Analytics</h2>
-        <div class="stats">Stats Placeholder</div>
-    </section>
-    <footer>
-        <button onclick="exportCSV()">Export CSV</button>
-    </footer>
-    <script src="script.js"></script>
+        <div>
+            <h3>Monthly Heatmap</h3>
+            <div id="gym-monthly-heatmap"></div>
+            <script>
+                // Implement gym logging here
+            </script>
+        </div>
+    </div>
+
+    <div id="applications" class="tab">
+        <h2>Job Applications Counter</h2>
+        <div>
+            <h3>Streak</h3>
+            <div id="job-applications-counter"></div>
+            <script>
+                // Implement job applications counter here
+            </script>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
 </body>
 </html>
