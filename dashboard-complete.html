@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Daily Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/react/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.js" crossorigin></script>
+    <style>
+        body { background-color: #1a202c; color: #cbd5e0; }
+        .dark-theme { background-color: #2d3748; }
+    </style>
+</head>
+<body class="dark-theme">
+    <div id="app" class="p-5">
+        <h1 class="text-3xl font-bold mb-5">Personal Daily Dashboard</h1>
+        <div>
+            <h2 class="text-2xl font-semibold mb-3">Today</h2>
+            <div>
+                <h3>Goals</h3>
+                <input type="text" placeholder="Set today's goals" class="mb-2 p-2 border border-gray-600 rounded-md">
+                <button class="bg-blue-500 text-white p-2 rounded-md">Add Goal</button>
+            </div>
+            <div class="mt-5">
+                <h3>Study Hours Tracking</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    {/* Render inputs for 9 subjects here */}
+                </div>
+            </div>
+            <div class="mt-5">
+                <h3>Expense Tracker</h3>
+                <div id="expense-donut-chart" class="h-64"></div> <!-- Placeholder for donut chart -->
+                <input type="text" placeholder="Expense" class="mb-2 p-2 border border-gray-600 rounded-md">
+                <button class="bg-blue-500 text-white p-2 rounded-md">Add Expense</button>
+            </div>
+            <div class="mt-5">
+                <h3>Gym Logging</h3>
+                <input type="text" placeholder="Gym Activity" class="mb-2 p-2 border border-gray-600 rounded-md">
+                <button class="bg-blue-500 text-white p-2 rounded-md">Log Activity</button>
+            </div>
+            <div class="mt-5">
+                <h3>Productive Hours</h3>
+                <input type="text" placeholder="Productive Hours" class="mb-2 p-2 border border-gray-600 rounded-md">
+                <button class="bg-blue-500 text-white p-2 rounded-md">Log Productive Time</button>
+            </div>
+            <div class="mt-5">
+                <h3>Job Applications</h3>
+                <input type="text" placeholder="Position" class="mb-2 p-2 border border-gray-600 rounded-md">
+                <button class="bg-blue-500 text-white p-2 rounded-md">Add Application</button>
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl font-semibold mt-10">Plan</h2>
+            <input type="text" placeholder="Set tomorrow's goals" class="mb-2 p-2 border border-gray-600 rounded-md">
+            <button class="bg-blue-500 text-white p-2 rounded-md">Add Tomorrow's Goal</button>
+        </div>
+        <div>
+            <h2 class="text-2xl font-semibold mt-10">Weekly Overview</h2>
+            <div id="weekly-charts">
+                <div id="study-hours-bar-chart" class="h-64"></div>
+                <div id="expenses-chart" class="h-64"></div>
+                <div id="productive-hours-chart" class="h-64"></div>
+                <div id="gym-heatmap" class="h-64"></div>
+                <div id="job-applications-chart" class="h-64"></div>
+                <button class="bg-green-500 text-white p-2 rounded-md">Export to CSV</button>
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl font-semibold mt-10">History</h2>
+            <div id="history"></div> <!-- Render past days here -->
+        </div>
+    </div>
+    <script>
+        // React components, state management, and localStorage logic will go here
+    </script>
+</body>
+</html>
