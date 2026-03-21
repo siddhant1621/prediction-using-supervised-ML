@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #tabs { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; cursor: pointer; border: 1px solid #ccc; border-bottom: none; }
+        .tab.active { background-color: #eee; }
+        .content { display: none; }
+        .content.active { display: block; }
+        .chart { width: 100%; height: 400px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Daily Dashboard</h1>
+    <div id="tabs">
+        <div class="tab active" onclick="showTab('today')">Today</div>
+        <div class="tab" onclick="showTab('plan')">Plan</div>
+        <div class="tab" onclick="showTab('weekly')">Weekly</div>
+        <div class="tab" onclick="showTab('history')">History</div>
+    </div>
+
+    <div id="today" class="content active">
+        <h2>Today</h2>
+        <label for="studyHours">Study Hours:</label>
+        <input type="number" id="studyHours" onchange="updateStorage()" placeholder="Enter hours" />
+        <canvas id="studyChart" class="chart"></canvas>
+    </div>
+
+    <div id="plan" class="content">
+        <h2>Plan</h2>
+        <label for="expenses">Expenses:</label>
+        <input type="number" id="expenses" onchange="updateStorage()" placeholder="Enter expenses" />
+        <canvas id="expensesChart" class="chart"></canvas>
+    </div>
+
+    <div id="weekly" class="content">
+        <h2>Weekly</h2>
+        <h3>Gym Tracking</h3>
+        <input type="number" id="gymSessions" onchange="updateStorage()" placeholder="Sessions per week" />
+        <canvas id="gymChart" class="chart"></canvas>
+    </div>
+
+    <div id="history" class="content">
+        <h2>History</h2>
+        <h3>Job Applications</h3>
+        <textarea id="jobApps" rows="4" onchange="updateStorage()" placeholder="Enter applications"></textarea>
+        <canvas id="historyChart" class="chart"></canvas>
+    </div>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab');
+
+        function showTab(tab) {
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tab).classList.add('active');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            drawCharts();
+        }
+
+        function updateStorage() {
+            const studyHours = document.getElementById('studyHours').value;
+            const expenses = document.getElementById('expenses').value;
+            const gymSessions = document.getElementById('gymSessions').value;
+            const jobApps = document.getElementById('jobApps').value;
+            localStorage.setItem('studyHours', studyHours);
+            localStorage.setItem('expenses', expenses);
+            localStorage.setItem('gymSessions', gymSessions);
+            localStorage.setItem('jobApps', jobApps);
+            drawCharts();
+        }
+
+        function drawCharts() {
+            const studyHours = localStorage.getItem('studyHours') || 0;
+            const expenses = localStorage.getItem('expenses') || 0;
+            const gymSessions = localStorage.getItem('gymSessions') || 0;
+            const jobApps = localStorage.getItem('jobApps') || '';
+            // Dummy chart example
+            const ctx1 = document.getElementById('studyChart').getContext('2d');
+            new Chart(ctx1, { type: 'bar', data: { labels: ['Study Hours'], datasets: [{ label: 'Hours', data: [studyHours], backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }] }, options: { scales: { y: { beginAtZero: true } } } });
+            // Other charts follows a similar structure
+        }
+
+        window.onload = function() {
+            document.getElementById('studyHours').value = localStorage.getItem('studyHours') || '';
+            document.getElementById('expenses').value = localStorage.getItem('expenses') || '';
+            document.getElementById('gymSessions').value = localStorage.getItem('gymSessions') || '';
+            document.getElementById('jobApps').value = localStorage.getItem('jobApps') || '';
+            drawCharts();
+        };
+    </script>
+</body>
+</html>
